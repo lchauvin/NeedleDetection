@@ -1,49 +1,26 @@
-project( NeedleDetection )
+cmake_minimum_required(VERSION 2.8.7)
+
+set(MODULE_NAME NeedleDetection)
+
+#-----------------------------------------------------------------------------
+if(NOT Slicer_SOURCE_DIR)
+  find_package(Slicer REQUIRED)
+  include(${Slicer_USE_FILE})
+endif()
 
 
-find_package(GenerateCLP REQUIRED)
-if(GenerateCLP_FOUND)
-  include(${GenerateCLP_USE_FILE})
-endif(GenerateCLP_FOUND)
-
-link_directories(${ModuleDescriptionParser_BINARY_DIR})
-
-find_package(ITK REQUIRED)
-include(${ITK_USE_FILE})
-
-include_directories(
-        ${SlicerBaseCLI_BINARY_DIR}
-        ${SlicerBaseCLI_SOURCE_DIR}
+#-----------------------------------------------------------------------------
+SEMMacroBuildCLI(
+  NAME ${MODULE_NAME}
+  LOGO_HEADER ${Slicer_SOURCE_DIR}/Resources/NAMICLogo.h
+  TARGET_LIBRARIES ModuleDescriptionParser ${ITK_LIBRARIES}
+  LINK_DIRECTORIES ${ModuleDescriptionParser_BINARY_DIR}
+  INCLUDE_DIRECTORIES
+    ${SlicerBaseCLI_SOURCE_DIR} ${SlicerBaseCLI_BINARY_DIR}
   )
 
 
-#####################
-
-set (CLP NeedleDetection )
-
-set ( ${CLP}_SOURCE ${CLP}.cxx)
-generateclp(${CLP}_SOURCE ${CLP}.xml ${Slicer3_SOURCE_DIR}/Resources/NAMICLogo.h)
-add_executable(${CLP} ${${CLP}_SOURCE})
-slicer3_set_plugins_output_path(${CLP})
-target_link_libraries (${CLP}
-  ITKIO
-  ITKStatistics
-  )
-
-add_library(${CLP}Lib SHARED ${${CLP}_SOURCE})
-set_target_properties (${CLP}Lib PROPERTIES COMPILE_FLAGS "-Dmain=ModuleEntryPoint")
-slicer3_set_plugins_output_path(${CLP}Lib)
-target_link_libraries (${CLP}Lib ITKIO ITKStatistics)
-
-if (Slicer3_SOURCE_DIR)
-  # install each target in the production area (where it would appear in an 
-  # installation) and install each target in the developer area (for running 
-  # from a build)
-  set(TARGETS        
-    NeedleDetection
-    )
-  slicer3_install_plugins(${TARGETS})
-
-endif (Slicer3_SOURCE_DIR)
-
-
+#-----------------------------------------------------------------------------
+#if(BUILD_TESTING)
+#  add_subdirectory(Testing)
+#endif()
