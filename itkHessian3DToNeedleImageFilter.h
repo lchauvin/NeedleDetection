@@ -120,6 +120,9 @@ public:
   itkSetMacro(AngleThreshold, double);
   itkGetConstMacro(AngleThreshold, double);
 
+  itkSetMacro(LineSimilarityThreshold, double);
+  itkGetConstMacro(LineSimilarityThreshold, double);
+
   inline void SetNormal(double x, double y, double z)
   {
     m_Normal[0] = x; m_Normal[1] = y; m_Normal[2] = z;
@@ -154,6 +157,7 @@ private:
   double m_Alpha1;
   double m_Alpha2;
   double m_AngleThreshold;
+  double m_LineSimilarityThreshold;
   double m_Normal[3];
 };
 

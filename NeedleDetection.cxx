@@ -19,12 +19,19 @@
 #include "itkRelabelComponentImageFilter.h"
 #include "itkMinimumMaximumImageFilter.h"
 
+//#include "itkMultiplyByConstantImageFilter.h"
+#include "itkTransformFileWriter.h"
+
+#include "itkHessian3DToVesselnessMeasureImageFilter.h"
+#include "itkMultiScaleHessianBasedMeasureImageFilter.h"
+#include "itkRescaleIntensityImageFilter.h"
+
+
 #include "itkImage.h"
 #include "itkImageFileReader.h"
 #include "itkImageFileWriter.h"
 #include "itkCastImageFilter.h"
-//#include "itkMultiplyByConstantImageFilter.h"
-#include "itkTransformFileWriter.h"
+
 
 #include "itkPluginUtilities.h"
 #include "NeedleDetectionCLP.h"
@@ -45,26 +52,29 @@ template<class T> int DoIt( int argc, char * argv[], T )
   typedef   T                   FileInputPixelType;
   typedef   float               InternalPixelType;
   typedef   int                 OutputPixelType;
-  
+
   typedef   itk::Image< FileInputPixelType, Dimension > FileInputImageType;
   typedef   itk::Image< InternalPixelType, Dimension >  InternalImageType;
   typedef   itk::Image< OutputPixelType, Dimension >    OutputImageType;
 
-  typedef   itk::ImageFileReader< FileInputImageType >  ReaderType;
-  typedef   itk::ImageFileWriter< OutputImageType > WriterType;
+  //typedef   itk::ImageFileReader< FileInputImageType >  ReaderType;
+  typedef   itk::ImageFileReader< InternalImageType >  ReaderType;
+  typedef   itk::ImageFileWriter< InternalImageType > WriterType;
+  //typedef   itk::ImageFileWriter< OutputImageType > WriterType;
 
   //typedef   itk::CastImageFilter< FileInputImageType, InternalImageType > CastFilterType;
 
   // Smoothing filter
   typedef   itk::SmoothingRecursiveGaussianImageFilter<
-    FileInputImageType, InternalImageType > SmoothingFilterType;
-  
+  InternalImageType, InternalImageType > SmoothingFilterType;
+
+  /*
   // Line enhancement filter
   typedef   itk::HessianRecursiveGaussianImageFilter< 
     InternalImageType > HessianFilterType;
+  */
   typedef   itk::Hessian3DToNeedleImageFilter<
     InternalPixelType > LineFilterType;
-
   // Otsu Threshold Segmentation filter
   typedef   itk::OtsuThresholdImageFilter<
     InternalImageType, InternalImageType >  OtsuFilterType;
@@ -72,20 +82,35 @@ template<class T> int DoIt( int argc, char * argv[], T )
     InternalImageType, OutputImageType >  CCFilterType;
   typedef   itk::RelabelComponentImageFilter<
     OutputImageType, OutputImageType > RelabelType;
-
   // Line detection filter
   typedef   itk::LabelToNeedleImageFilter<
-    OutputImageType, OutputImageType > NeedleFilterType;
+  OutputImageType, OutputImageType > NeedleFilterType;
+
+  // Declare the type of enhancement filter - use ITK's 3D vesselness (Sato)
+  //typedef itk::Hessian3DToVesselnessMeasureImageFilter<double> VesselnessFilterType;
+  // Declare the type of multiscale enhancement filter
+  typedef itk::RescaleIntensityImageFilter<InternalImageType> RescaleFilterType;
+  typedef itk::Hessian3DToVesselnessMeasureImageFilter<double> VesselnessFilterType;
+
+  typedef itk::NumericTraits< InternalPixelType >::RealType RealPixelType;
+  typedef itk::SymmetricSecondRankTensor< RealPixelType, Dimension > HessianPixelType;
+  typedef itk::Image< HessianPixelType, Dimension >                  HessianImageType;
+  typedef itk::MultiScaleHessianBasedMeasureImageFilter< InternalImageType, HessianImageType, InternalImageType >
+    MultiScaleEnhancementFilterType;
 
   typename ReaderType::Pointer reader = ReaderType::New();  
   typename WriterType::Pointer writer = WriterType::New();
   typename SmoothingFilterType::Pointer smoothing = SmoothingFilterType::New();
+/*
   typename HessianFilterType::Pointer hessianFilter = HessianFilterType::New();
+  */
   typename LineFilterType::Pointer lineFilter = LineFilterType::New();
+
   typename OtsuFilterType::Pointer OtsuFilter = OtsuFilterType::New();
   typename CCFilterType::Pointer CCFilter = CCFilterType::New();
   typename RelabelType::Pointer RelabelFilter = RelabelType::New();
   typename NeedleFilterType::Pointer needleFilter = NeedleFilterType::New();
+
 
   reader->SetFileName( inputVolume.c_str() );
   writer->SetFileName( outputVolume.c_str() );
@@ -94,19 +119,28 @@ template<class T> int DoIt( int argc, char * argv[], T )
   //cast->SetInput( reader->GetOutput() );
   smoothing->SetInput( reader->GetOutput() );
   smoothing->SetSigma( static_cast< double >(sigma1) );
-
+  /*
   hessianFilter->SetInput( smoothing->GetOutput() );
-  hessianFilter->SetSigma( static_cast< double >(sigma2) );
-
+  hessianFilter->SetSigma( static_cast< double >(sig) );
   lineFilter->SetInput( hessianFilter->GetOutput() );
+  */
+  lineFilter->SetLineSimilarityThreshold(lineth);
   lineFilter->SetAlpha1( static_cast< double >(alpha1));
   lineFilter->SetAlpha2( static_cast< double >(alpha2));
   lineFilter->SetAngleThreshold (static_cast< double >(anglethreshold) );
   lineFilter->SetNormal (static_cast< double >(normal[0]),
-                           static_cast< double >(normal[1]),
-                           static_cast< double >(normal[2]));
+                         static_cast< double >(normal[1]),
+                         static_cast< double >(normal[2]));
+  
+  MultiScaleEnhancementFilterType::Pointer multiScaleEnhancementFilter = MultiScaleEnhancementFilterType::New();
+  multiScaleEnhancementFilter->SetInput(smoothing->GetOutput());
+  multiScaleEnhancementFilter->SetSigmaMinimum(0.5);
+  multiScaleEnhancementFilter->SetSigmaMaximum(sigma2);
+  multiScaleEnhancementFilter->SetNumberOfSigmaSteps(5);
+  multiScaleEnhancementFilter->SetHessianToMeasureFilter (lineFilter);
 
-  OtsuFilter->SetInput( lineFilter->GetOutput() );
+  /*
+  OtsuFilter->SetInput( multiScaleEnhancementFilter->GetOutput());
   OtsuFilter->SetOutsideValue( 255 );
   OtsuFilter->SetInsideValue(  0  );
   OtsuFilter->SetNumberOfHistogramBins( numberOfBins );
@@ -131,7 +165,11 @@ template<class T> int DoIt( int argc, char * argv[], T )
                                 static_cast< double >(closestPoint[2]));
 
   writer->SetInput( needleFilter->GetOutput() );
+  */
+
+  writer->SetInput(multiScaleEnhancementFilter->GetOutput());
   writer->SetUseCompression(1);
+
   try
     {
     writer->Update();

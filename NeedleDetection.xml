@@ -24,7 +24,7 @@ This work is part of the National Alliance for Medical Image Computing (NAMIC), 
       <index>0</index>
       <description>Input volume</description>
     </image>
-    <image type="label">
+    <image>
       <name>outputVolume</name>
       <label>Output Volume</label>
       <channel>output</channel>
@@ -62,6 +62,14 @@ This work is part of the National Alliance for Medical Image Computing (NAMIC), 
       <label>Sigma2</label>
       <description>Sigma value in physical units (e.g., mm) of the Gaussian kernel for needle thickness</description>
       <default>1.0</default>
+    </double>
+    <double>
+      <name>lineth</name>
+      <longflag>lineth</longflag>
+      <flag>l</flag>
+      <label>LineThreshold</label>
+      <description>Line Similarity Threshold</description>
+      <default>5</default>
     </double>
     <double>
       <name>alpha1</name>
