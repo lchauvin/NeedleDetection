@@ -77,7 +77,7 @@ This work is part of NIH 5R01 CA111288 -- Enabling Technologies for MRI-guided P
       <flag>w</flag>
       <label>Sigma Steps</label>
       <description>Number of steps for multi-scale Hessian vesselness measure.</description>
-      <default>5</default>
+      <default>6</default>
     </integer>
     <double>
       <name>minlinemeasure</name>
@@ -152,7 +152,7 @@ This work is part of NIH 5R01 CA111288 -- Enabling Technologies for MRI-guided P
 	Minimum length of the principal axis of the needle artifact.
       </description>
       <label>Min. Principal Axis Length</label>
-      <default>100.0</default>
+      <default>50.0</default>
     </float>
     <float>
       <name>maxMinorAxisLength</name>

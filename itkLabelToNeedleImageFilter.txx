@@ -112,14 +112,24 @@ LabelToNeedleImageFilter< TInput, TOutput >
   VectorType closestNormal;   // Orientation normal vector of the needle closest to the default point.
   VectorType closestTip;      // Tip of the needle closest to the default point.
 
+  for (int i = 0; i < 3; i ++)
+    {
+    closestNormal[i] = 0.0;
+    closestPosition[i] = 0.0;
+    closestTip[i] = 0.0;
+    }
+  
+
   typename PointListMapType::iterator miter;
   for (miter = pointListMap.begin(); miter != pointListMap.end(); miter ++)
     {
     InputPixelType pix = miter->first;
     PointListType::Pointer sample = miter->second; 
-
+    if (pix==0)
+      {
+      continue;
+      }
     std::cout << "=== Label " << pix << "===" << std::endl;
-    
     typedef itk::Statistics::CovarianceSampleFilter< PointListType > 
       CovarianceAlgorithmType;
     CovarianceAlgorithmType::Pointer covarianceAlgorithm = 
@@ -148,7 +158,7 @@ LabelToNeedleImageFilter< TInput, TOutput >
                                             eigenValues, eigenMatrix );    
 
     std::cout << "EigenValues: " << eigenValues << std::endl;
-    std::cout << "EigenVectors (each row is an an eigen vector): " << std::endl;
+    std::cout << "EigenVectors (each row is an eigen vector): " << std::endl;
     std::cout << eigenMatrix << std::endl;
 
     // Check the distribution along the eigen vectors
@@ -233,36 +243,39 @@ LabelToNeedleImageFilter< TInput, TOutput >
   m_NeedleTransform = NeedleTransformType::New();
   m_NeedleTransform->SetIdentity();
 
-  VectorType nx;
-  VectorType ny;
-  nx[0] = 1.0; nx[1] = 0.0; nx[2] = 0.0;
-  ny[0] = 0.0; ny[1] = 1.0; ny[2] = 0.0;
-  typedef itk::CrossHelper< VectorType > CrossType;
-  CrossType cross;
-  VectorType t = cross(closestNormal, nx);
-  VectorType s = cross(t, closestNormal);
+  if (pointListMap.size() >= 2)
+    {
+    VectorType nx;
+    VectorType ny;
+    nx[0] = 1.0; nx[1] = 0.0; nx[2] = 0.0;
+    ny[0] = 0.0; ny[1] = 1.0; ny[2] = 0.0;
+    typedef itk::CrossHelper< VectorType > CrossType;
+    CrossType cross;
+    VectorType t = cross(closestNormal, nx);
+    VectorType s = cross(t, closestNormal);
+    
+    t.Normalize();
+    s.Normalize();
+    closestNormal.Normalize();
+    
+    NeedleTransformType::MatrixType matrix;
+    matrix[0][0] = s[0];
+    matrix[0][1] = s[1];
+    matrix[0][2] = s[2];
+    
+    matrix[1][0] = t[0];
+    matrix[1][1] = t[1];
+    matrix[1][2] = t[2];
+    
+    matrix[2][0] = closestNormal[0];
+    matrix[2][1] = closestNormal[1];
+    matrix[2][2] = closestNormal[2];
+
+    // Convert translation for slicer coordinate
+    m_NeedleTransform->SetMatrix( matrix );
+    m_NeedleTransform->Translate( - (matrix * closestTip) );
+    }
   
-  t.Normalize();
-  s.Normalize();
-  closestNormal.Normalize();
-
-  NeedleTransformType::MatrixType matrix;
-  matrix[0][0] = s[0];
-  matrix[0][1] = s[1];
-  matrix[0][2] = s[2];
-
-  matrix[1][0] = t[0];
-  matrix[1][1] = t[1];
-  matrix[1][2] = t[2];
-
-  matrix[2][0] = closestNormal[0];
-  matrix[2][1] = closestNormal[1];
-  matrix[2][2] = closestNormal[2];
-
-  // Convert translation for slicer coordinate
-  m_NeedleTransform->SetMatrix( matrix );
-  m_NeedleTransform->Translate( - (matrix * closestTip) );
-
 }
 
 
