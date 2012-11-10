@@ -162,8 +162,7 @@ LabelToNeedleImageFilter< TInput, TOutput >
     std::cout << eigenMatrix << std::endl;
 
     // Check the distribution along the eigen vectors
-    if ( eigenValues[2] >= m_MinPrincipalAxisLength &&
-         sqrt(eigenValues[0]*eigenValues[0]+eigenValues[1]*eigenValues[1]) <= m_MaxMinorAxisLength)
+    if ( eigenValues[2] >= m_MinPrincipalAxisLength)
       {
       // Check the direction of principal component
       VectorType principalVector = eigenMatrix[2];

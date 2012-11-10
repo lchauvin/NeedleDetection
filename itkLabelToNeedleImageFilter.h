@@ -62,9 +62,6 @@ public:
   /** Method for creation through the object factory. */
   itkNewMacro(Self);
   
-  itkSetMacro(MaxMinorAxisLength, float);
-  itkGetConstMacro(MaxMinorAxisLength, float);
-
   itkSetMacro(MinPrincipalAxisLength, float);
   itkGetConstMacro(MinPrincipalAxisLength, float);
 
@@ -117,7 +114,6 @@ private:
   void operator=(const Self&); //purposely not implemented
   
   float m_MinPrincipalAxisLength;
-  float m_MaxMinorAxisLength;
   double m_AngleThreshold;
   VectorType m_Normal;
   VectorType m_ClosestPoint;

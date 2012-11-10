@@ -135,7 +135,6 @@ template<class T> int DoIt( int argc, char * argv[], T )
 
   needleFilter->SetInput( RelabelFilter->GetOutput() );
   needleFilter->SetMinPrincipalAxisLength( static_cast< float >(minPrincipalAxisLength) );
-  needleFilter->SetMaxMinorAxisLength( static_cast< float >(maxMinorAxisLength) );
   needleFilter->SetAngleThreshold (static_cast< double >(anglethreshold) );
 
   // Set default orientation and closest point of the needle for detection
