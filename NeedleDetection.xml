@@ -7,11 +7,11 @@
 	  Apply a gaussian blurr to an image
 </description>
   <version>0.1.0.$Revision: 1.1 $(alpha)</version>
-  <documentation-url>http://www.slicer.org/slicerWiki/index.php/Modules:GaussianBlur-Documentation-3.6</documentation-url>
+  <documentation-url>http://https://github.com/SNRLab/NeedleDetection</documentation-url>
   <license></license>
-  <contributor>Julien Jomier and Stephen Aylward</contributor>
+  <contributor>Junichi Tokuda</contributor>
 <acknowledgements>
-This work is part of the National Alliance for Medical Image Computing (NAMIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149.
+This work is part of NIH 5R01 CA111288 -- Enabling Technologies for MRI-guided Prostate Interventions (PI: Clare M. Tempany).
 </acknowledgements>
 
   <parameters>
@@ -24,7 +24,7 @@ This work is part of the National Alliance for Medical Image Computing (NAMIC), 
       <index>0</index>
       <description>Input volume</description>
     </image>
-    <image>
+    <image type="label">
       <name>outputVolume</name>
       <label>Output Volume</label>
       <channel>output</channel>
@@ -56,20 +56,36 @@ This work is part of the National Alliance for Medical Image Computing (NAMIC), 
     <label>Hessian and Eigen Analysis</label>
     <description>Hessian and eigen analysis parameters</description>
     <double>
-      <name>sigma2</name>
-      <longflag>sigma2</longflag>
-      <flag>p</flag>
-      <label>Sigma2</label>
-      <description>Sigma value in physical units (e.g., mm) of the Gaussian kernel for needle thickness</description>
-      <default>1.0</default>
+      <name>minsigma</name>
+      <longflag>minsigma</longflag>
+      <flag>u</flag>
+      <label>Min. Sigma</label>
+      <description>Minimum Sigma value in physical units (e.g., mm) of the Gaussian kernel for needle thickness</description>
+      <default>0.5</default>
     </double>
     <double>
-      <name>lineth</name>
-      <longflag>lineth</longflag>
-      <flag>l</flag>
-      <label>LineThreshold</label>
-      <description>Line Similarity Threshold</description>
+      <name>maxsigma</name>
+      <longflag>maxsigma</longflag>
+      <flag>v</flag>
+      <label>Max. Sigma</label>
+      <description>Maximum Sigma value in physical units (e.g., mm) of the Gaussian kernel for needle thickness</description>
+      <default>1.0</default>
+    </double>
+    <integer>
+      <name>stepsigma</name>
+      <longflag>stepsigma</longflag>
+      <flag>w</flag>
+      <label>Sigma Steps</label>
+      <description>Number of steps for multi-scale Hessian vesselness measure.</description>
       <default>5</default>
+    </integer>
+    <double>
+      <name>minlinemeasure</name>
+      <longflag>minlm</longflag>
+      <flag>l</flag>
+      <label>Min. Line Measure</label>
+      <description>Minimum Line Measure</description>
+      <default>10.0</default>
     </double>
     <double>
       <name>alpha1</name>

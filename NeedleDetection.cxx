@@ -6,9 +6,7 @@
 #define ITK_LEAN_AND_MEAN
 #endif
 
-//#include "itkSmoothingRecursiveGaussianImageFilter.h"
 #include "itkHessianRecursiveGaussianImageFilter.h"
-//#include "itkHessian3DToVesselnessMeasureImageFilter.h"
 #include "itkSmoothingRecursiveGaussianImageFilter.h"
 #include "itkHessian3DToNeedleImageFilter.h"
 #include "itkSymmetricSecondRankTensor.h"
@@ -57,22 +55,14 @@ template<class T> int DoIt( int argc, char * argv[], T )
   typedef   itk::Image< InternalPixelType, Dimension >  InternalImageType;
   typedef   itk::Image< OutputPixelType, Dimension >    OutputImageType;
 
-  //typedef   itk::ImageFileReader< FileInputImageType >  ReaderType;
   typedef   itk::ImageFileReader< InternalImageType >  ReaderType;
-  typedef   itk::ImageFileWriter< InternalImageType > WriterType;
-  //typedef   itk::ImageFileWriter< OutputImageType > WriterType;
-
-  //typedef   itk::CastImageFilter< FileInputImageType, InternalImageType > CastFilterType;
+  typedef   itk::ImageFileWriter< OutputImageType > WriterType;
 
   // Smoothing filter
   typedef   itk::SmoothingRecursiveGaussianImageFilter<
   InternalImageType, InternalImageType > SmoothingFilterType;
-
-  /*
+  
   // Line enhancement filter
-  typedef   itk::HessianRecursiveGaussianImageFilter< 
-    InternalImageType > HessianFilterType;
-  */
   typedef   itk::Hessian3DToNeedleImageFilter<
     InternalPixelType > LineFilterType;
   // Otsu Threshold Segmentation filter
@@ -101,7 +91,8 @@ template<class T> int DoIt( int argc, char * argv[], T )
   typename ReaderType::Pointer reader = ReaderType::New();  
   typename WriterType::Pointer writer = WriterType::New();
   typename SmoothingFilterType::Pointer smoothing = SmoothingFilterType::New();
-/*
+
+  /*
   typename HessianFilterType::Pointer hessianFilter = HessianFilterType::New();
   */
   typename LineFilterType::Pointer lineFilter = LineFilterType::New();
@@ -115,16 +106,10 @@ template<class T> int DoIt( int argc, char * argv[], T )
   reader->SetFileName( inputVolume.c_str() );
   writer->SetFileName( outputVolume.c_str() );
 
-  //typename CastFilterType::Pointer cast = CastFilterType::New();
-  //cast->SetInput( reader->GetOutput() );
   smoothing->SetInput( reader->GetOutput() );
   smoothing->SetSigma( static_cast< double >(sigma1) );
-  /*
-  hessianFilter->SetInput( smoothing->GetOutput() );
-  hessianFilter->SetSigma( static_cast< double >(sig) );
-  lineFilter->SetInput( hessianFilter->GetOutput() );
-  */
-  lineFilter->SetLineSimilarityThreshold(lineth);
+
+  lineFilter->SetMinimumLineMeasure(minlinemeasure);
   lineFilter->SetAlpha1( static_cast< double >(alpha1));
   lineFilter->SetAlpha2( static_cast< double >(alpha2));
   lineFilter->SetAngleThreshold (static_cast< double >(anglethreshold) );
@@ -134,12 +119,11 @@ template<class T> int DoIt( int argc, char * argv[], T )
   
   MultiScaleEnhancementFilterType::Pointer multiScaleEnhancementFilter = MultiScaleEnhancementFilterType::New();
   multiScaleEnhancementFilter->SetInput(smoothing->GetOutput());
-  multiScaleEnhancementFilter->SetSigmaMinimum(0.5);
-  multiScaleEnhancementFilter->SetSigmaMaximum(sigma2);
-  multiScaleEnhancementFilter->SetNumberOfSigmaSteps(5);
+  multiScaleEnhancementFilter->SetSigmaMinimum(minsigma);
+  multiScaleEnhancementFilter->SetSigmaMaximum(maxsigma);
+  multiScaleEnhancementFilter->SetNumberOfSigmaSteps(stepsigma);
   multiScaleEnhancementFilter->SetHessianToMeasureFilter (lineFilter);
 
-  /*
   OtsuFilter->SetInput( multiScaleEnhancementFilter->GetOutput());
   OtsuFilter->SetOutsideValue( 255 );
   OtsuFilter->SetInsideValue(  0  );
@@ -165,9 +149,6 @@ template<class T> int DoIt( int argc, char * argv[], T )
                                 static_cast< double >(closestPoint[2]));
 
   writer->SetInput( needleFilter->GetOutput() );
-  */
-
-  writer->SetInput(multiScaleEnhancementFilter->GetOutput());
   writer->SetUseCompression(1);
 
   try

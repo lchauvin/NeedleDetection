@@ -35,7 +35,7 @@ Hessian3DToNeedleImageFilter< TPixel >
   m_Alpha1 = 0.5;
   m_Alpha2 = 2.0;
   m_AngleThreshold = 0.0;
-  m_LineSimilarityThreshold = 5.0;
+  m_MinimumLineMeasure = 5.0;
   m_Normal[0] = 0.0;
   m_Normal[1] = 0.0;
   m_Normal[2] = 1.0;
@@ -119,25 +119,33 @@ Hessian3DToNeedleImageFilter< TPixel >
         }
 
       lineMeasure *= -normalizeValue;
-      if (lineMeasure > m_LineSimilarityThreshold)
+      //if (lineMeasure > m_MinimumLineMeasure)
+      //{
+      // Calculate the inner product of the normal vector and the first eigen vector
+      double ip = eit.Get()[0] * m_Normal[0] + eit.Get()[1] * m_Normal[1] + eit.Get()[2] * m_Normal[2];
+      if (vnl_math_abs(ip) >= cosThreshold)
         {
-        // Calculate the inner product of the normal vector and the first eigen vector
-        double ip = eit.Get()[0] * m_Normal[0] + eit.Get()[1] * m_Normal[1] + eit.Get()[2] * m_Normal[2];
-        if (vnl_math_abs(ip) > cosThreshold)
-          {
-          //lineMeasure *= -normalizeValue;
-          lineMeasure = 255;
-          }
-        else
-          {
+          lineMeasure *= -normalizeValue;
+          //lineMeasure = 255;
+        }
+      else
+        {
           lineMeasure = 0.0;
-          }
-        oit.Set( static_cast< OutputPixelType >(lineMeasure) );
+        }
+      if (lineMeasure > m_MinimumLineMeasure)
+        {
+        //oit.Set( static_cast< OutputPixelType >(lineMeasure) );
+        oit.Set( static_cast< OutputPixelType >(255) );
         }
       else
         {
         oit.Set( NumericTraits< OutputPixelType >::Zero );
         }
+      //}
+      //else
+      //{
+      //oit.Set( NumericTraits< OutputPixelType >::Zero );
+      //}
       }
     else
       {
