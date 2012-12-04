@@ -1,3 +1,18 @@
+/*=========================================================================
+
+  Program:   3D Slicer Needle Detection CLI
+  Language:  C++
+  Author:    Junichi Tokuda, Ph.D. (Brigham and Women's Hospital)
+
+  Copyright (c) Brigham and Women's Hospital. All rights reserved.
+  See ITKCopyright.txt or http://www.itk.org/HTML/Copyright.htm for details.
+
+     This software is distributed WITHOUT ANY WARRANTY; without even 
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     PURPOSE.  See the above copyright notices for more information.
+
+=========================================================================*/
+
 #if defined(_MSC_VER)
 #pragma warning ( disable : 4786 )
 #endif
