@@ -17,6 +17,11 @@
 #ifndef __itkHessian3DToNeedleImageFilter_h
 #define __itkHessian3DToNeedleImageFilter_h
 
+#include "itkImageBase.h"
+#include "itkImageToImageFilter.h"
+#include "itkImage.h"
+#include "itkVector.h"
+
 #include "itkSymmetricSecondRankTensor.h"
 #include "itkSymmetricEigenAnalysisImageFilterWithMatrix.h"
 
@@ -89,8 +94,12 @@ public:
   typedef TPixel                                         OutputPixelType;
   
   /** Image dimension = 3. */
+  /*
   itkStaticConstMacro(ImageDimension, unsigned int,
                       ::itk::GetImageDimension<InputImageType>::ImageDimension);
+  */
+  itkStaticConstMacro(ImageDimension, unsigned int,
+                      InputImageType::ImageDimension);
   itkStaticConstMacro(InputPixelDimension, unsigned int,
                       InputPixelType::Dimension);
 

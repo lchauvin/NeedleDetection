@@ -12,7 +12,7 @@ endif()
 #-----------------------------------------------------------------------------
 SEMMacroBuildCLI(
   NAME ${MODULE_NAME}
-  LOGO_HEADER ${Slicer_SOURCE_DIR}/Resources/NAMICLogo.h
+  #LOGO_HEADER ${Slicer_SOURCE_DIR}/Resources/NAMICLogo.h
   TARGET_LIBRARIES ModuleDescriptionParser ${ITK_LIBRARIES}
   LINK_DIRECTORIES ${ModuleDescriptionParser_BINARY_DIR}
   INCLUDE_DIRECTORIES
