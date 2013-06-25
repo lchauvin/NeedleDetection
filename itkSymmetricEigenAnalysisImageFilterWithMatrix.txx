@@ -193,7 +193,7 @@ template <class TInputImage, class TOutputImage >
 void
 SymmetricEigenAnalysisImageFilterWithMatrix<TInputImage,TOutputImage>
 ::ThreadedGenerateData( const OutputImageRegionType &outputRegionForThread,
-                        int threadId)
+                        ThreadIdType threadId)
 {
   InputImagePointer  inputPtr = this->GetInput();
   OutputImagePointer outputPtr = this->GetOutput(0);
