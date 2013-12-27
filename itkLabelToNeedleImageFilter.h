@@ -46,7 +46,7 @@ public:
   typedef typename InputImageType::PixelType             InputPixelType;
   typedef typename OutputImageType::PixelType            OutputPixelType;
   
-  typedef typename itk::CenteredAffineTransform< float, 3 >      NeedleTransformType;
+  typedef typename itk::CenteredAffineTransform< double, 3 >      NeedleTransformType;
 
   typedef itk::Vector< double, 3 > VectorType;
 
