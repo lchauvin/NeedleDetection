@@ -55,6 +55,14 @@ This work is part of NIH 5R01 CA111288 -- Enabling Technologies for MRI-guided P
   <parameters>
     <label>Hessian and Eigen Analysis</label>
     <description>Hessian and eigen analysis parameters</description>
+    <boolean>
+      <name>positivecontrast</name>
+      <longflag>positivecontrast</longflag>
+      <flag>p</flag>
+      <label>Pos. Contrast</label>
+      <description>Check if the needle is positive contrast (e.g. CT)</description>
+      <default>false</default>
+    </boolean>
     <double>
       <name>minsigma</name>
       <longflag>minsigma</longflag>

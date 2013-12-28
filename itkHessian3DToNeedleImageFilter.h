@@ -132,6 +132,9 @@ public:
   itkSetMacro(MinimumLineMeasure, double);
   itkGetConstMacro(MinimumLineMeasure, double);
 
+  itkSetMacro(PositiveContrast, bool);
+  itkGetMacro(PositiveContrast, bool);
+
   inline void SetNormal(double x, double y, double z)
   {
     m_Normal[0] = x; m_Normal[1] = y; m_Normal[2] = z;
@@ -168,6 +171,7 @@ private:
   double m_AngleThreshold;
   double m_MinimumLineMeasure;
   double m_Normal[3];
+  bool m_PositiveContrast;
 };
 
 } // end namespace itk

@@ -40,6 +40,8 @@ Hessian3DToNeedleImageFilter< TPixel >
   m_Normal[1] = 0.0;
   m_Normal[2] = 1.0;
 
+  m_PositiveContrast = false;
+
   // Hessian( Image ) = Jacobian( Gradient ( Image ) )  is symmetric
   m_SymmetricEigenValueFilter = EigenAnalysisFilterType::New();
   m_SymmetricEigenValueFilter->SetDimension( ImageDimension );
@@ -99,12 +101,22 @@ Hessian3DToNeedleImageFilter< TPixel >
     {
     // Get the eigen value
     eigenValue = it.Get();
-    
+
+    double sign;
+    if (m_PositiveContrast)
+      {
+      sign = -1.0;
+      }
+    else
+      {
+      sign = 1.0;
+      }
+
     // normalizeValue <= 0 for bright line structures
     double normalizeValue = vnl_math_min( -1.0 * eigenValue[1], -1.0 * eigenValue[0]);
     
     // Similarity measure to a line structure
-    if( normalizeValue < 0 )
+    if( normalizeValue*sign < 0 )
       {
       double lineMeasure;
       if( eigenValue[2] <= 0 )
@@ -118,15 +130,11 @@ Hessian3DToNeedleImageFilter< TPixel >
           vcl_exp(-0.5 * vnl_math_sqr( eigenValue[2] / (m_Alpha2 * normalizeValue)));
         }
 
-      lineMeasure *= -normalizeValue;
-      //if (lineMeasure > m_MinimumLineMeasure)
-      //{
-      // Calculate the inner product of the normal vector and the first eigen vector
+      lineMeasure *= (-normalizeValue * sign);
       double ip = eit.Get()[0] * m_Normal[0] + eit.Get()[1] * m_Normal[1] + eit.Get()[2] * m_Normal[2];
       if (vnl_math_abs(ip) >= cosThreshold)
         {
-          lineMeasure *= -normalizeValue;
-          //lineMeasure = 255;
+          lineMeasure *= -normalizeValue * sign;
         }
       else
         {
@@ -134,24 +142,17 @@ Hessian3DToNeedleImageFilter< TPixel >
         }
       if (lineMeasure > m_MinimumLineMeasure)
         {
-        //oit.Set( static_cast< OutputPixelType >(lineMeasure) );
         oit.Set( static_cast< OutputPixelType >(255) );
         }
       else
         {
         oit.Set( NumericTraits< OutputPixelType >::Zero );
         }
-      //}
-      //else
-      //{
-      //oit.Set( NumericTraits< OutputPixelType >::Zero );
-      //}
       }
     else
       {
       oit.Set( NumericTraits< OutputPixelType >::Zero );
       }
-    //oit.Set( static_cast< OutputPixelType >(eigenValue[0]) );
 
     ++it;
     ++oit;

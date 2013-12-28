@@ -124,6 +124,7 @@ template<class T> int DoIt( int argc, char * argv[], T )
   smoothing->SetInput( reader->GetOutput() );
   smoothing->SetSigma( static_cast< double >(sigma1) );
 
+  lineFilter->SetPositiveContrast(positivecontrast);
   lineFilter->SetMinimumLineMeasure(minlinemeasure);
   lineFilter->SetAlpha1( static_cast< double >(alpha1));
   lineFilter->SetAlpha2( static_cast< double >(alpha2));
