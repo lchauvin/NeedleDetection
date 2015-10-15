@@ -32,13 +32,9 @@
 #include "itkRelabelComponentImageFilter.h"
 #include "itkMinimumMaximumImageFilter.h"
 
-//#include "itkMultiplyByConstantImageFilter.h"
 #include "itkTransformFileWriter.h"
 
-#include "itkHessian3DToVesselnessMeasureImageFilter.h"
 #include "itkMultiScaleHessianBasedMeasureImageFilter.h"
-#include "itkRescaleIntensityImageFilter.h"
-
 
 #include "itkImage.h"
 #include "itkImageFileReader.h"
@@ -62,15 +58,14 @@ template<class T> int DoIt( int argc, char * argv[], T )
 
   const     unsigned int        Dimension       = 3;
 
-  typedef   T                   FileInputPixelType;
   typedef   float               InternalPixelType;
   typedef   int                 OutputPixelType;
 
-  typedef   itk::Image< FileInputPixelType, Dimension > FileInputImageType;
   typedef   itk::Image< InternalPixelType, Dimension >  InternalImageType;
   typedef   itk::Image< OutputPixelType, Dimension >    OutputImageType;
 
   typedef   itk::ImageFileReader< InternalImageType >  ReaderType;
+  typedef   itk::ImageFileWriter< InternalImageType > IntermediateWriterType;
   typedef   itk::ImageFileWriter< OutputImageType > WriterType;
 
   // Smoothing filter
@@ -91,12 +86,7 @@ template<class T> int DoIt( int argc, char * argv[], T )
   typedef   itk::LabelToNeedleImageFilter<
   OutputImageType, OutputImageType > NeedleFilterType;
 
-  // Declare the type of enhancement filter - use ITK's 3D vesselness (Sato)
-  //typedef itk::Hessian3DToVesselnessMeasureImageFilter<double> VesselnessFilterType;
   // Declare the type of multiscale enhancement filter
-  typedef itk::RescaleIntensityImageFilter<InternalImageType> RescaleFilterType;
-  typedef itk::Hessian3DToVesselnessMeasureImageFilter<double> VesselnessFilterType;
-
   typedef itk::NumericTraits< InternalPixelType >::RealType RealPixelType;
   typedef itk::SymmetricSecondRankTensor< RealPixelType, Dimension > HessianPixelType;
   typedef itk::Image< HessianPixelType, Dimension >                  HessianImageType;
@@ -104,12 +94,10 @@ template<class T> int DoIt( int argc, char * argv[], T )
     MultiScaleEnhancementFilterType;
 
   typename ReaderType::Pointer reader = ReaderType::New();  
+  typename IntermediateWriterType::Pointer hessianWriter = IntermediateWriterType::New();
   typename WriterType::Pointer writer = WriterType::New();
   typename SmoothingFilterType::Pointer smoothing = SmoothingFilterType::New();
 
-  /*
-  typename HessianFilterType::Pointer hessianFilter = HessianFilterType::New();
-  */
   typename LineFilterType::Pointer lineFilter = LineFilterType::New();
 
   typename OtsuFilterType::Pointer OtsuFilter = OtsuFilterType::New();
@@ -117,8 +105,8 @@ template<class T> int DoIt( int argc, char * argv[], T )
   typename RelabelType::Pointer RelabelFilter = RelabelType::New();
   typename NeedleFilterType::Pointer needleFilter = NeedleFilterType::New();
 
-
   reader->SetFileName( inputVolume.c_str() );
+  hessianWriter->SetFileName( hessianVolume.c_str() );
   writer->SetFileName( outputVolume.c_str() );
 
   smoothing->SetInput( reader->GetOutput() );
@@ -139,6 +127,18 @@ template<class T> int DoIt( int argc, char * argv[], T )
   multiScaleEnhancementFilter->SetSigmaMaximum(maxsigma);
   multiScaleEnhancementFilter->SetNumberOfSigmaSteps(stepsigma);
   multiScaleEnhancementFilter->SetHessianToMeasureFilter (lineFilter);
+  multiScaleEnhancementFilter->GenerateHessianOutputOn();
+
+  hessianWriter->SetInput( multiScaleEnhancementFilter->GetOutput() );
+  try
+    {
+    hessianWriter->Update();
+    }
+  catch (itk::ExceptionObject &err)
+    {
+    std::cerr << err << std::endl;
+    return EXIT_FAILURE;
+    }
 
   OtsuFilter->SetInput( multiScaleEnhancementFilter->GetOutput());
   OtsuFilter->SetOutsideValue( 255 );

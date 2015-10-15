@@ -24,11 +24,18 @@ This work is part of NIH 5R01 CA111288 -- Enabling Technologies for MRI-guided P
       <index>0</index>
       <description>Input volume</description>
     </image>
+    <image>
+      <name>hessianVolume</name>
+      <label>Hessian Volume</label>
+      <channel>output</channel>
+      <index>1</index>
+      <description>Output of the Hessian filter</description>
+    </image>
     <image type="label">
       <name>outputVolume</name>
       <label>Output Volume</label>
       <channel>output</channel>
-      <index>1</index>
+      <index>2</index>
       <description>Blurred Volume</description>
     </image>
     <transform fileExtensions=".txt" reference="NeedlePositionFileName">
