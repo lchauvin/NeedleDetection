@@ -24,6 +24,7 @@
 #include "itkHessianRecursiveGaussianImageFilter.h"
 #include "itkSmoothingRecursiveGaussianImageFilter.h"
 #include "itkHessian3DToNeedleImageFilter.h"
+#include "itkHoughTransform3DLinesImageFilter.h"
 #include "itkSymmetricSecondRankTensor.h"
 #include "itkLabelToNeedleImageFilter.h"
 
